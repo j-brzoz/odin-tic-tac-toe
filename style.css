@@ -3,3 +3,24 @@
     padding: 0; 
     box-sizing: border-box; 
 }
+
+.board{
+    display: grid;
+    grid-template-columns: 150px 150px 150px;
+    grid-template-rows: 150px 150px 150px;
+}
+
+.notChosen{
+    background-color: bisque;
+    border: 2px black solid;
+}
+
+.firstSign{
+    background-color: orange;
+    border: 2px black solid;
+}
+
+.secondSign{
+    background-color: red;
+    border: 2px black solid;
+}
