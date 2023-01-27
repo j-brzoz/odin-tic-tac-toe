@@ -4,7 +4,7 @@ const playerFactory = (name, sign, status) => ({name, sign, status,});
 const player1 = playerFactory("Sally", "x", 1);
 const player2 = playerFactory("Mater", "o", 0);
 
-function changePlayerStatus(){
+function changePlayersStatus(){
     player1.status = player1.status === 1 ? 0 : 1;
     player2.status = player2.status === 1 ? 0 : 1;
 }
@@ -14,6 +14,9 @@ const gameBoard = (() => {
     const board = [];
     for(let i = 0; i < 9; i+=1)
         board[i] = 0;
+
+    const playersPicks = [];
+    let lastPick = -1;
 
     // checking the score
     const checkScore = () => {
@@ -51,6 +54,7 @@ const gameBoard = (() => {
     // putting players' choices in the "board:
     const setFieldValue = () => function funSetFieldValue(e){
         e.target.setAttribute("listener", "false");
+        playersPicks.push(e.target.id - 1);
         if(player1.status === 1){
             board[e.target.id-1] = player1.sign;
         }
@@ -67,10 +71,25 @@ const gameBoard = (() => {
         player2.status = 0;
     };
 
+    // undoing
+    const undo = () => function funUndo(){
+        if(playersPicks.length > 0){
+            const undoField = playersPicks.pop();
+            board[undoField] = 0;
+            changePlayersStatus();
+            lastPick = undoField;
+        }
+    };
+
+    // last pick for display controller
+    const getLastPick = () => lastPick;
+
     return {
         setFieldValue,
         checkScore,
-        clearBoard
+        clearBoard,
+        undo,
+        getLastPick,
     };
 })();
 
@@ -80,12 +99,12 @@ const displayController = (() => {
     const changeFieldDisplay = () => function funChangeFieldDisplay(e){
         if(player1.status === 1){
             e.target.className = "firstSign";
-            changePlayerStatus();
+            changePlayersStatus();
             gameBoard.checkScore();       
         }
         else if(player2.status === 1){
             e.target.className = "secondSign";
-            changePlayerStatus();
+            changePlayersStatus();
             gameBoard.checkScore();
         }
     };
@@ -105,9 +124,22 @@ const displayController = (() => {
         result.textContent = "";
     };
 
+    // undoing display
+    const undoDisplay = () => function funUndoDisplay(){
+        const fieldNumber = gameBoard.getLastPick();
+        const field = document.getElementsByTagName("field");
+        field[fieldNumber].className = "notChosen";
+        field[fieldNumber].addEventListener("click", gameBoard.setFieldValue(fieldNumber), {once: true });
+        field[fieldNumber].addEventListener("click", displayController.changeFieldDisplay(fieldNumber), {once: true });
+        field[fieldNumber].setAttribute("listener", "true");
+        const result = document.querySelector(".result");
+        result.textContent = "";        
+    }
+
     return {
         changeFieldDisplay,
-        clearDisplay
+        clearDisplay,
+        undoDisplay
     };
 })();
 
@@ -119,9 +151,15 @@ function listen(){
         field[i].addEventListener("click", gameBoard.setFieldValue(i), {once: true });
         field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
     }
+    
     const restartBtn = document.getElementById("restartBtn");
     restartBtn.addEventListener("click", gameBoard.clearBoard());
     restartBtn.addEventListener("click", displayController.clearDisplay(field));
+
+    const undoBtn = document.getElementById("undoBtn");
+    undoBtn.addEventListener("click", gameBoard.undo());
+    undoBtn.addEventListener("click", displayController.undoDisplay());
+
 }
 
 listen();
