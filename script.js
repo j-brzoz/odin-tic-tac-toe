@@ -50,21 +50,33 @@ const gameBoard = (() => {
     }
     // putting players' choices in the "board:
     const setFieldValue = () => function funSetFieldValue(e){
-            if(player1.status === 1){
-                board[e.target.id-1] = player1.sign;
-            }
-            else if(player2.status === 1){
-                board[e.target.id-1] = player2.sign;
-            }
-        };
+        e.target.setAttribute("listener", "false");
+        if(player1.status === 1){
+            board[e.target.id-1] = player1.sign;
+        }
+        else if(player2.status === 1){
+            board[e.target.id-1] = player2.sign;
+        }
+    };
+
+    // clearing the board
+    const clearBoard = () => function funClearBoard(){
+        for(let i = 0; i < 9; i+=1)
+            board[i] = 0;
+        player1.status = 1;
+        player2.status = 0;
+    };
+
     return {
         setFieldValue,
-        checkScore
+        checkScore,
+        clearBoard
     };
 })();
 
 // controlling grid display
 const displayController = (() => {    
+    // show user input
     const changeFieldDisplay = () => function funChangeFieldDisplay(e){
         if(player1.status === 1){
             e.target.className = "firstSign";
@@ -77,8 +89,25 @@ const displayController = (() => {
             gameBoard.checkScore();
         }
     };
+
+    // clear display
+    const clearDisplay = () => function funClearDisplay(){
+        const field = document.getElementsByTagName("field");
+        for (let i = 0; i < field.length; i+=1) {
+            field[i].className = "notChosen";
+            if(field[i].getAttribute("listener") !== "true"){
+                field[i].addEventListener("click", gameBoard.setFieldValue(i), {once: true });
+                field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
+                field[i].setAttribute("listener", "true");
+            }
+        }
+        const result = document.querySelector(".result");
+        result.textContent = "";
+    };
+
     return {
-        changeFieldDisplay
+        changeFieldDisplay,
+        clearDisplay
     };
 })();
 
@@ -86,9 +115,13 @@ const displayController = (() => {
 function listen(){
     const field = document.getElementsByTagName("field");
     for (let i = 0; i < field.length; i+=1) {
+        field[i].setAttribute("listener", "true");
         field[i].addEventListener("click", gameBoard.setFieldValue(i), {once: true });
         field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
-    } 
+    }
+    const restartBtn = document.getElementById("restartBtn");
+    restartBtn.addEventListener("click", gameBoard.clearBoard());
+    restartBtn.addEventListener("click", displayController.clearDisplay(field));
 }
 
 listen();
