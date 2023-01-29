@@ -1,14 +1,28 @@
 // DOM Elements
-const domElements = (function(){
+const domElements = (function elems(){
     const field = document.getElementsByTagName("field");
     const result = document.querySelector(".result");
     const restartBtn = document.getElementById("restartBtn");
     const undoBtn = document.getElementById("undoBtn");
+    const gameSettingsModal = document.getElementById("gameSettingsModal");
+    const playerSubmitModalBtn = document.getElementById("playerSubmitBtn");
+    const computerSubmitModalBtn = document.getElementById("computerSubmitBtn");
+    const playerTabBtn = document.getElementById("playerFormat");
+    const computerTabBtn = document.getElementById("computerFormat");
+    const playerTab = document.getElementById("player");
+    const computerTab = document.getElementById("computer");
     return {
         field,
         result,
         restartBtn,
-        undoBtn
+        undoBtn,
+        gameSettingsModal,
+        playerSubmitModalBtn,
+        computerSubmitModalBtn,
+        playerTabBtn,
+        computerTabBtn,
+        playerTab,
+        computerTab
     }
 })();
 
@@ -109,7 +123,7 @@ const gameBoard = (() => {
 
 // controlling grid display
 const displayController = (() => {    
-    // show user input
+    // shows user input
     const changeFieldDisplay = () => function funChangeFieldDisplay(e){
         if(player1.status === 1){
             e.target.className = "firstSign";
@@ -123,7 +137,7 @@ const displayController = (() => {
         }
     };
 
-    // clear display
+    // clears display
     const clearDisplay = () => function funClearDisplay(){
         for (let i = 0; i < domElements.field.length; i+=1) {
             domElements.field[i].className = "notChosen";
@@ -137,7 +151,7 @@ const displayController = (() => {
         result.textContent = "";
     };
 
-    // undoing display
+    // undoes field display
     const undoDisplay = () => function funUndoDisplay(){
         const fieldNumber = gameBoard.getLastPick();
         domElements.field[fieldNumber].className = "notChosen";
@@ -148,10 +162,23 @@ const displayController = (() => {
         result.textContent = "";        
     }
 
+    // stops displaying modal
+    const modalToNone = () => function funModalToNone() {
+    domElements.gameSettingsModal.style.display = "none";
+    };
+
+    // changes tabs on the modal
+    const changeModalTabs = (format) => function funChangeModalTabs() {
+        domElements.playerTab.style.display = format === "player" ? "block" : "none";
+        domElements.computerTab.style.display = format=== "computer" ? "block" : "none";
+    };
+
     return {
         changeFieldDisplay,
         clearDisplay,
-        undoDisplay
+        undoDisplay,
+        modalToNone,
+        changeModalTabs
     };
 })();
 
@@ -163,14 +190,23 @@ function listen(){
         domElements.field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
     }
     
-    
+    // restart button
     domElements.restartBtn.addEventListener("click", gameBoard.clearBoard());
-    domElements.restartBtn.addEventListener("click", displayController.clearDisplay(domElements.field));
+    domElements.restartBtn.addEventListener("click", displayController.clearDisplay());
 
-    
+    // undo button
     domElements.undoBtn.addEventListener("click", gameBoard.undo());
     domElements.undoBtn.addEventListener("click", displayController.undoDisplay());
 
 }
 
 listen();
+
+// book modal
+domElements.playerSubmitModalBtn.addEventListener("click", displayController.modalToNone());
+domElements.computerSubmitModalBtn.addEventListener("click", displayController.modalToNone());
+
+// changing tabs on modal
+domElements.playerTabBtn.addEventListener("click", displayController.changeModalTabs("player"));
+domElements.computerTabBtn.addEventListener("click", displayController.changeModalTabs("computer"));
+
