@@ -1,3 +1,18 @@
+// DOM Elements
+const domElements = (function(){
+    const field = document.getElementsByTagName("field");
+    const result = document.querySelector(".result");
+    const restartBtn = document.getElementById("restartBtn");
+    const undoBtn = document.getElementById("undoBtn");
+    return {
+        field,
+        result,
+        restartBtn,
+        undoBtn
+    }
+})();
+
+
 // making players
 const playerFactory = (name, sign, status) => ({name, sign, status,});
 
@@ -20,27 +35,26 @@ const gameBoard = (() => {
 
     // checking the score
     const checkScore = () => {
-        const result = document.querySelector(".result");
         let winner = "";
         // checking rows
         for(let i = 0; i < 9; i+=3){
             if(board[i] === board[i+1] && board[i+1] === board[i+2] && board[i] !== 0){
                 winner = player1.sign === board[i] ? player1.name : player2.name;
-                result.textContent = `${winner  } won! Congratulations!`;
+                domElements.result.textContent = `${winner  } won! Congratulations!`;
             }
         }
         // checking columns
         for(let i = 0; i < 3; i+=1){
             if(board[i] === board[i+3] && board[i+3] === board[i+6] && board[i] !== 0){
                 winner = player1.sign === board[i] ? player1.name : player2.name;
-                result.textContent = `${winner  } won! Congratulations!`;
+                domElements.result.textContent = `${winner  } won! Congratulations!`;
             }
         }
         // checking diagonals
         if((board[0] === board[4] && board[4] === board[8] && board[0] !== 0) ||
            (board[2] === board[4] && board[4] === board[6] && board[2] !== 0)){
             winner = player1.sign === board[4] ? player1.name : player2.name;
-            result.textContent = `${winner  } won! Congratulations!`;
+            domElements.textContent = `${winner  } won! Congratulations!`;
         }
         // checking if it is a draw
         if(winner === ""){
@@ -48,7 +62,7 @@ const gameBoard = (() => {
             while(board[i] !== 0 && i < 9)
                 i+=1;
             if(i === 9)
-                result.textContent = "Draw!";
+            domElements.textContent = "Draw!";
         }
     }
     // putting players' choices in the "board:
@@ -111,13 +125,12 @@ const displayController = (() => {
 
     // clear display
     const clearDisplay = () => function funClearDisplay(){
-        const field = document.getElementsByTagName("field");
-        for (let i = 0; i < field.length; i+=1) {
-            field[i].className = "notChosen";
-            if(field[i].getAttribute("listener") !== "true"){
-                field[i].addEventListener("click", gameBoard.setFieldValue(i), {once: true });
-                field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
-                field[i].setAttribute("listener", "true");
+        for (let i = 0; i < domElements.field.length; i+=1) {
+            domElements.field[i].className = "notChosen";
+            if(domElements.field[i].getAttribute("listener") !== "true"){
+                domElements.field[i].addEventListener("click", gameBoard.setFieldValue(i), {once: true });
+                domElements.field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
+                domElements.field[i].setAttribute("listener", "true");
             }
         }
         const result = document.querySelector(".result");
@@ -127,11 +140,10 @@ const displayController = (() => {
     // undoing display
     const undoDisplay = () => function funUndoDisplay(){
         const fieldNumber = gameBoard.getLastPick();
-        const field = document.getElementsByTagName("field");
-        field[fieldNumber].className = "notChosen";
-        field[fieldNumber].addEventListener("click", gameBoard.setFieldValue(fieldNumber), {once: true });
-        field[fieldNumber].addEventListener("click", displayController.changeFieldDisplay(fieldNumber), {once: true });
-        field[fieldNumber].setAttribute("listener", "true");
+        domElements.field[fieldNumber].className = "notChosen";
+        domElements.field[fieldNumber].addEventListener("click", gameBoard.setFieldValue(fieldNumber), {once: true });
+        domElements.field[fieldNumber].addEventListener("click", displayController.changeFieldDisplay(fieldNumber), {once: true });
+        domElements.field[fieldNumber].setAttribute("listener", "true");
         const result = document.querySelector(".result");
         result.textContent = "";        
     }
@@ -145,20 +157,19 @@ const displayController = (() => {
 
 // getting input from players
 function listen(){
-    const field = document.getElementsByTagName("field");
-    for (let i = 0; i < field.length; i+=1) {
-        field[i].setAttribute("listener", "true");
-        field[i].addEventListener("click", gameBoard.setFieldValue(i), {once: true });
-        field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
+    for (let i = 0; i < domElements.field.length; i+=1) {
+        domElements.field[i].setAttribute("listener", "true");
+        domElements.field[i].addEventListener("click", gameBoard.setFieldValue(i), {once: true });
+        domElements.field[i].addEventListener("click", displayController.changeFieldDisplay(i), {once: true });
     }
     
-    const restartBtn = document.getElementById("restartBtn");
-    restartBtn.addEventListener("click", gameBoard.clearBoard());
-    restartBtn.addEventListener("click", displayController.clearDisplay(field));
+    
+    domElements.restartBtn.addEventListener("click", gameBoard.clearBoard());
+    domElements.restartBtn.addEventListener("click", displayController.clearDisplay(domElements.field));
 
-    const undoBtn = document.getElementById("undoBtn");
-    undoBtn.addEventListener("click", gameBoard.undo());
-    undoBtn.addEventListener("click", displayController.undoDisplay());
+    
+    domElements.undoBtn.addEventListener("click", gameBoard.undo());
+    domElements.undoBtn.addEventListener("click", displayController.undoDisplay());
 
 }
 
