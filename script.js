@@ -76,8 +76,9 @@ const gameBoard = (() => {
             let i = 0;
             while(board[i] !== 0 && i < 9)
                 i+=1;
+            console.log(i);
             if(i === 9)
-            domElements.textContent = "Draw!";
+                domElements.result.textContent = "Draw!";
         }
     }
     // puts players' choices in the array
@@ -94,14 +95,21 @@ const gameBoard = (() => {
 
     // puts player's and computer's random choice in the array
     const randomComputerChoice = () => function funRandomComputerChoice(){
-        let computerChoice = Math.floor(Math.random() * 8);       
-        while(board[computerChoice] === "x" || board[computerChoice] === "o")
-            computerChoice = Math.floor(Math.random() * 8);
+        let tmp = 0;
+        for(let i = 0; i < 9; i+=1)
+            if(board[i] !== 0)
+                tmp+=1;
+        if(tmp !== 9 && domElements.result.textContent === ""){
+            let computerChoice = Math.floor(Math.random() * 8);       
+            while(board[computerChoice] === "x" || board[computerChoice] === "o")
+                computerChoice = Math.floor(Math.random() * 8);
 
-        board[computerChoice] = player2.sign;
-        lastComputerPick = computerChoice;
-        const randomField = document.getElementById(computerChoice+1);
-        randomField.setAttribute("listener", "false");
+            board[computerChoice] = player2.sign;
+            lastComputerPick = computerChoice;
+            playersPicks.push(computerChoice);
+            const randomField = document.getElementById(computerChoice+1);
+            randomField.setAttribute("listener", "false");
+        }
     };
 
     // clears the grid
@@ -122,6 +130,18 @@ const gameBoard = (() => {
         }
     };
 
+    // undoes player's choice vs computer
+    const undoVsComputer = () => function funUndoVsComputer(){
+        for(let i = 0; i < 2; i+=1){
+            if(playersPicks.length > 0){
+                const undoField = playersPicks.pop();
+                board[undoField] = 0;
+                changePlayersStatus();
+                lastPlayerPick = undoField;
+            }
+        }
+    };
+
     // last players' pick for display controller
     const getLastPlayerPick = () => lastPlayerPick;
 
@@ -134,6 +154,7 @@ const gameBoard = (() => {
         checkScore,
         clearBoard,
         undo,
+        undoVsComputer,
         getLastPlayerPick,
         getLastComputerPick
     };
@@ -177,6 +198,22 @@ const displayController = (() => {
         result.textContent = "";
     };
 
+    // clears display vs computer
+    const clearDisplayVsComputer = () => function funClearDisplayVsComputer(){
+        for (let i = 0; i < domElements.field.length; i+=1) {
+            domElements.field[i].className = "notChosen";
+            if(domElements.field[i].getAttribute("listener") !== "true"){
+                domElements.field[i].addEventListener("click", gameBoard.playerChoice(i), {once: true });
+                domElements.field[i].addEventListener("click", displayController.showPlayerInput(i), {once: true });
+                domElements.field[i].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
+                domElements.field[i].addEventListener("click", displayController.showComputerInput(), {once: true });
+                domElements.field[i].setAttribute("listener", "true");
+            }
+        }
+        const result = document.querySelector(".result");
+        result.textContent = "";
+    };
+
     // undoes field display
     const undoDisplay = () => function funUndoDisplay(){
         const fieldNumber = gameBoard.getLastPlayerPick();
@@ -184,6 +221,29 @@ const displayController = (() => {
         domElements.field[fieldNumber].addEventListener("click", gameBoard.playerChoice(fieldNumber), {once: true });
         domElements.field[fieldNumber].addEventListener("click", displayController.showPlayerInput(fieldNumber), {once: true });
         domElements.field[fieldNumber].setAttribute("listener", "true");
+        const result = document.querySelector(".result");
+        result.textContent = "";        
+    }
+
+    // undoes field display vs computer
+    const undoDisplayVsComputer = () => function funUndoDisplayVsComputer(){
+        const playerFieldNumber = gameBoard.getLastPlayerPick();
+        const computerFieldNumber = gameBoard.getLastComputerPick();
+
+        domElements.field[playerFieldNumber].className = "notChosen";
+        domElements.field[playerFieldNumber].addEventListener("click", gameBoard.playerChoice(playerFieldNumber), {once: true });
+        domElements.field[playerFieldNumber].addEventListener("click", displayController.showPlayerInput(playerFieldNumber), {once: true });
+        domElements.field[playerFieldNumber].setAttribute("listener", "true");
+        domElements.field[playerFieldNumber].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
+        domElements.field[playerFieldNumber].addEventListener("click", displayController.showComputerInput(), {once: true });
+
+        domElements.field[computerFieldNumber].className = "notChosen";
+        domElements.field[computerFieldNumber].addEventListener("click", gameBoard.playerChoice(computerFieldNumber), {once: true });
+        domElements.field[computerFieldNumber].addEventListener("click", displayController.showPlayerInput(computerFieldNumber), {once: true });
+        domElements.field[computerFieldNumber].setAttribute("listener", "true");
+        domElements.field[computerFieldNumber].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
+        domElements.field[computerFieldNumber].addEventListener("click", displayController.showComputerInput(), {once: true });
+
         const result = document.querySelector(".result");
         result.textContent = "";        
     }
@@ -203,7 +263,9 @@ const displayController = (() => {
         showPlayerInput,
         showComputerInput,
         clearDisplay,
+        clearDisplayVsComputer,
         undoDisplay,
+        undoDisplayVsComputer,
         modalToNone,
         changeModalTabs
     };
@@ -238,6 +300,13 @@ const gameModes = (() => {
             domElements.field[i].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
             domElements.field[i].addEventListener("click", displayController.showComputerInput(), {once: true });
         }
+            // restart button
+            domElements.restartBtn.addEventListener("click", gameBoard.clearBoard());
+            domElements.restartBtn.addEventListener("click", displayController.clearDisplayVsComputer());
+        
+            // undo button
+            domElements.undoBtn.addEventListener("click", gameBoard.undoVsComputer());
+            domElements.undoBtn.addEventListener("click", displayController.undoDisplayVsComputer());
     }
     return{
         listenPlayer,
@@ -252,7 +321,4 @@ domElements.computerSubmitModalBtn.addEventListener("click", gameModes.listenCom
 
 // changing tabs on modal
 domElements.playerTabBtn.addEventListener("click", displayController.changeModalTabs("player"));
-// domElements.playerTabBtn.addEventListener("click", listenPlayer());
 domElements.computerTabBtn.addEventListener("click", displayController.changeModalTabs("computer"));
-// domElements.computerTabBtn.addEventListener("click", listenComputer());
-
