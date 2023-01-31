@@ -48,67 +48,76 @@ const gameBoard = (() => {
     let lastPlayerPick = -1;
     let lastComputerPick = -1;
 
-    // checking the score
+    // checks the score
     const checkScore = () => {
-        let winner = "";
         // checks rows
-        for(let i = 0; i < 9; i+=3){
-            if(board[i] === board[i+1] && board[i+1] === board[i+2] && board[i] !== 0){
-                winner = player1.sign === board[i] ? player1.name : player2.name;
-                domElements.result.textContent = `${winner  } won! Congratulations!`;
-            }
-        }
+        for(let i = 0; i < 9; i+=3)
+            if(board[i] === board[i+1] && board[i+1] === board[i+2] && board[i] !== 0)
+                return player1.sign === board[i] ? 1 : -1;
+
         // checks columns
-        for(let i = 0; i < 3; i+=1){
-            if(board[i] === board[i+3] && board[i+3] === board[i+6] && board[i] !== 0){
-                winner = player1.sign === board[i] ? player1.name : player2.name;
-                domElements.result.textContent = `${winner  } won! Congratulations!`;
-            }
-        }
+        for(let i = 0; i < 3; i+=1)
+            if(board[i] === board[i+3] && board[i+3] === board[i+6] && board[i] !== 0)
+                return player1.sign === board[i] ? 1 : -1; 
+
         // checks diagonals
         if((board[0] === board[4] && board[4] === board[8] && board[0] !== 0) ||
-           (board[2] === board[4] && board[4] === board[6] && board[2] !== 0)){
-            winner = player1.sign === board[4] ? player1.name : player2.name;
-            domElements.result.textContent = `${winner  } won! Congratulations!`;
-        }
+           (board[2] === board[4] && board[4] === board[6] && board[2] !== 0))
+            return player1.sign === board[4] ? 1 : -1;
+        
         // checks if it is a draw
-        if(winner === ""){
+        if(domElements.result.textContent === ""){
             let i = 0;
             while(board[i] !== 0 && i < 9)
                 i+=1;
-            console.log(i);
+
             if(i === 9)
-                domElements.result.textContent = "Draw!";
+                return 0;   
         }
+        return 2;
     }
+
+    // prints ending message
+    const printScore = () =>{
+        const result = gameBoard.checkScore();
+        if(result === 1)
+            domElements.result.textContent = `${player1.name  } won! Congratulations!`;
+        else if(result === -1)
+            domElements.result.textContent = `${player2.name  } won! Congratulations!`;
+        else if(result === 0)
+            domElements.result.textContent = "Draw!";
+    }
+
     // puts players' choices in the array
     const playerChoice = () => function funPlayerChoice(e){
-        e.target.setAttribute("listener", "false");
-        playersPicks.push(e.target.id - 1);
-        if(player1.status === 1){
-            board[e.target.id-1] = player1.sign;
-        }
-        else if(player2.status === 1){
-            board[e.target.id-1] = player2.sign;
+        if(board[e.target.id-1] === 0){
+            e.target.setAttribute("listener", "false");
+            playersPicks.push(e.target.id - 1);
+            if(player1.status === 1){
+                board[e.target.id-1] = player1.sign;
+            }
+            else if(player2.status === 1){
+                board[e.target.id-1] = player2.sign;
+            }
         }
     };
 
     // puts player's and computer's random choice in the array
-    const randomComputerChoice = () => function funRandomComputerChoice(){
-        let tmp = 0;
-        for(let i = 0; i < 9; i+=1)
-            if(board[i] !== 0)
-                tmp+=1;
-        if(tmp !== 9 && domElements.result.textContent === ""){
-            let computerChoice = Math.floor(Math.random() * 8);       
-            while(board[computerChoice] === "x" || board[computerChoice] === "o")
-                computerChoice = Math.floor(Math.random() * 8);
+    const randomComputerChoice = () => function funRandomComputerChoice(e){
+        if(e.target.className === "firstSign"){
+            let tmp = 0;
+            for(let i = 0; i < 9; i+=1)
+                if(board[i] !== 0)
+                    tmp+=1;
+            if(tmp !== 9 && domElements.result.textContent === ""){
+                let computerChoice = Math.floor(Math.random() * 8);       
+                while(board[computerChoice] === "x" || board[computerChoice] === "o")
+                    computerChoice = Math.floor(Math.random() * 8);
 
-            board[computerChoice] = player2.sign;
-            lastComputerPick = computerChoice;
-            playersPicks.push(computerChoice);
-            const randomField = document.getElementById(computerChoice+1);
-            randomField.setAttribute("listener", "false");
+                board[computerChoice] = player2.sign;
+                lastComputerPick = computerChoice;
+                playersPicks.push(computerChoice);
+            }
         }
     };
 
@@ -132,13 +141,11 @@ const gameBoard = (() => {
 
     // undoes player's choice vs computer
     const undoVsComputer = () => function funUndoVsComputer(){
-        for(let i = 0; i < 2; i+=1){
-            if(playersPicks.length > 0){
-                const undoField = playersPicks.pop();
-                board[undoField] = 0;
-                changePlayersStatus();
-                lastPlayerPick = undoField;
-            }
+        if(playersPicks.length > 0){
+            lastComputerPick = playersPicks.pop();
+            board[lastComputerPick] = 0;
+            lastPlayerPick = playersPicks.pop();
+            board[lastPlayerPick] = 0;
         }
     };
 
@@ -151,6 +158,7 @@ const gameBoard = (() => {
     return {
         playerChoice,
         randomComputerChoice,
+        printScore,
         checkScore,
         clearBoard,
         undo,
@@ -164,24 +172,30 @@ const gameBoard = (() => {
 const displayController = (() => {    
     // shows players' inputs
     const showPlayerInput = () => function funShowPlayerInput(e){
-        if(player1.status === 1){
-            e.target.className = "firstSign";
-            changePlayersStatus();
-            gameBoard.checkScore();       
-        }
-        else if(player2.status === 1){
-            e.target.className = "secondSign";
-            changePlayersStatus();
-            gameBoard.checkScore();
+        if(e.target.className === "notChosen"){
+            if(player1.status === 1){
+                e.target.className = "firstSign";
+                changePlayersStatus();
+                gameBoard.printScore();       
+            }
+            else if(player2.status === 1){
+                e.target.className = "secondSign";
+                changePlayersStatus();
+                gameBoard.printScore();
+            }
         }
     };
 
     // shows computer's inputs
-    const showComputerInput = () => function funShowComputerInput(){
-        const randomField = document.getElementById(gameBoard.getLastComputerPick()+1);
-        randomField.className = "secondSign";
-        changePlayersStatus();
-        gameBoard.checkScore();
+    const showComputerInput = () => function funShowComputerInput(e){
+        if(e.target.className === "firstSign"){
+            
+            const randomField = document.getElementById(gameBoard.getLastComputerPick()+1);
+            console.log(gameBoard.getLastComputerPick())
+            randomField.className = "secondSign";
+            changePlayersStatus();
+            gameBoard.printScore();
+        }
     };
 
     // clears display
@@ -194,8 +208,7 @@ const displayController = (() => {
                 domElements.field[i].setAttribute("listener", "true");
             }
         }
-        const result = document.querySelector(".result");
-        result.textContent = "";
+        domElements.result.textContent = "";
     };
 
     // clears display vs computer
@@ -205,13 +218,12 @@ const displayController = (() => {
             if(domElements.field[i].getAttribute("listener") !== "true"){
                 domElements.field[i].addEventListener("click", gameBoard.playerChoice(i), {once: true });
                 domElements.field[i].addEventListener("click", displayController.showPlayerInput(i), {once: true });
-                domElements.field[i].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
-                domElements.field[i].addEventListener("click", displayController.showComputerInput(), {once: true });
                 domElements.field[i].setAttribute("listener", "true");
+                domElements.field[i].addEventListener("click", gameBoard.randomComputerChoice(i), {once: true });
+                domElements.field[i].addEventListener("click", displayController.showComputerInput(i), {once: true });
             }
         }
-        const result = document.querySelector(".result");
-        result.textContent = "";
+        domElements.result.textContent = "";
     };
 
     // undoes field display
@@ -231,19 +243,13 @@ const displayController = (() => {
         const computerFieldNumber = gameBoard.getLastComputerPick();
 
         domElements.field[playerFieldNumber].className = "notChosen";
+        domElements.field[playerFieldNumber].setAttribute("listener", "true");
         domElements.field[playerFieldNumber].addEventListener("click", gameBoard.playerChoice(playerFieldNumber), {once: true });
         domElements.field[playerFieldNumber].addEventListener("click", displayController.showPlayerInput(playerFieldNumber), {once: true });
-        domElements.field[playerFieldNumber].setAttribute("listener", "true");
-        domElements.field[playerFieldNumber].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
-        domElements.field[playerFieldNumber].addEventListener("click", displayController.showComputerInput(), {once: true });
-
+        domElements.field[playerFieldNumber].addEventListener("click", gameBoard.randomComputerChoice(playerFieldNumber), {once: true });
+        domElements.field[playerFieldNumber].addEventListener("click", displayController.showComputerInput(playerFieldNumber), {once: true });
         domElements.field[computerFieldNumber].className = "notChosen";
-        domElements.field[computerFieldNumber].addEventListener("click", gameBoard.playerChoice(computerFieldNumber), {once: true });
-        domElements.field[computerFieldNumber].addEventListener("click", displayController.showPlayerInput(computerFieldNumber), {once: true });
-        domElements.field[computerFieldNumber].setAttribute("listener", "true");
-        domElements.field[computerFieldNumber].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
-        domElements.field[computerFieldNumber].addEventListener("click", displayController.showComputerInput(), {once: true });
-
+  
         const result = document.querySelector(".result");
         result.textContent = "";        
     }
@@ -297,8 +303,8 @@ const gameModes = (() => {
             domElements.field[i].setAttribute("listener", "true");
             domElements.field[i].addEventListener("click", gameBoard.playerChoice(i), {once: true });
             domElements.field[i].addEventListener("click", displayController.showPlayerInput(i), {once: true });
-            domElements.field[i].addEventListener("click", gameBoard.randomComputerChoice(), {once: true });
-            domElements.field[i].addEventListener("click", displayController.showComputerInput(), {once: true });
+            domElements.field[i].addEventListener("click", gameBoard.randomComputerChoice(i), {once: true });
+            domElements.field[i].addEventListener("click", displayController.showComputerInput(i), {once: true });
         }
             // restart button
             domElements.restartBtn.addEventListener("click", gameBoard.clearBoard());
@@ -313,6 +319,7 @@ const gameModes = (() => {
         listenComputer
     }
 })();
+
 // start settings modal
 domElements.playerSubmitModalBtn.addEventListener("click", displayController.modalToNone());
 domElements.computerSubmitModalBtn.addEventListener("click", displayController.modalToNone());
