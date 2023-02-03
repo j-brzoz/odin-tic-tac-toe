@@ -169,7 +169,7 @@ const gameBoard = (() => {
                 const moveEval = minimax(9 - turn, true);
                 board[i] = 0;
 
-                console.log(`index: ${  i  } val: ${  moveEval}`);
+                // console.log(`index: ${  i  } val: ${  moveEval}`);
                 if(moveEval < minEval){
                     index = i;
                     minEval = moveEval;
@@ -215,8 +215,14 @@ const gameBoard = (() => {
     // undoes player's move vs computer
     const undoVsComputer = () => function funUndoVsComputer(){
         if(playersMoves.length > 0){
-            lastComputerMove = playersMoves.pop();
-            board[lastComputerMove] = 0;
+            let tmp = 0;
+            for(let i = 0; i < 9; i+=1)
+                if(board[i] !== 0)
+                    tmp+=1;
+            if(tmp !== 1){
+                lastComputerMove = playersMoves.pop();
+                board[lastComputerMove] = 0;
+            }
             lastPlayerMove = playersMoves.pop();
             board[lastPlayerMove] = 0;
         }
@@ -329,6 +335,7 @@ const displayController = (() => {
         const playerFieldNumber = gameBoard.getLastPlayerMove();
         const computerFieldNumber = gameBoard.getLastComputerMove();
 
+
         domElements.field[playerFieldNumber].className = "notChosen";
         domElements.field[playerFieldNumber].setAttribute("listener", "true");
         domElements.field[playerFieldNumber].addEventListener("click", gameBoard.playerMove(playerFieldNumber), {once: true });
@@ -346,13 +353,22 @@ const displayController = (() => {
         const playerFieldNumber = gameBoard.getLastPlayerMove();
         const computerFieldNumber = gameBoard.getLastComputerMove();
 
+        let tmp = 0;
+            for(let i = 0; i < 9; i+=1)
+                if(domElements.field[i].className !== "notChosen")
+                    tmp+=1;
+
+        if(tmp !== 1){
+            domElements.field[computerFieldNumber].className = "notChosen";
+        }
+
+        console.log(`pfn: ${  playerFieldNumber}`);
         domElements.field[playerFieldNumber].className = "notChosen";
         domElements.field[playerFieldNumber].setAttribute("listener", "true");
         domElements.field[playerFieldNumber].addEventListener("click", gameBoard.playerMove(playerFieldNumber), {once: true });
         domElements.field[playerFieldNumber].addEventListener("click", displayController.showPlayerInput(playerFieldNumber), {once: true });
         domElements.field[playerFieldNumber].addEventListener("click", gameBoard.bestComputerMove(playerFieldNumber), {once: true });
         domElements.field[playerFieldNumber].addEventListener("click", displayController.showComputerInput(playerFieldNumber), {once: true });
-        domElements.field[computerFieldNumber].className = "notChosen";
   
         const result = document.querySelector(".result");
         result.textContent = "";        
