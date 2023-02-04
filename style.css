@@ -1,3 +1,12 @@
+
+:root.dark {
+    --background-color: rgb(60, 60, 60);
+}
+
+:root.light {
+    --background-color: rgb(200, 200, 200);
+}
+
 * { 
     margin: 0;
     padding: 0; 
@@ -5,7 +14,7 @@
 }
 
 body {
-    background-color: rgb(60, 59, 59);
+    background-color: var(--background-color);
 }
 
 
@@ -52,4 +61,8 @@ body {
     padding: 20px 40px;
     width: 20%;
     border-radius: 12px;
+}
+
+#endModal {
+    display: none;
 }

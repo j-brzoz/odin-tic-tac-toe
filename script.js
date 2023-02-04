@@ -501,7 +501,6 @@ domElements.gameForm.addEventListener("submit", (e) => {
   new FormData(domElements.gameForm);
   displayController.modalToNone();
 });
-
 domElements.gameForm.addEventListener("formdata", (e) => {
     player1.name = "You";
     player2.name = "Computer";
@@ -520,3 +519,11 @@ domElements.gameForm.addEventListener("formdata", (e) => {
 
     domElements.gameForm.reset(); 
 });
+
+// theme change
+function setTheme() {
+    const root = document.documentElement;
+    const newTheme = root.className === "dark" ? "light" : "dark";
+    root.className = newTheme;
+  }
+document.getElementById("themeChangeBtn").addEventListener("click", setTheme);
