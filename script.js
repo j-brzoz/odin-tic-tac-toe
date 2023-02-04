@@ -4,6 +4,8 @@ const domElements = (function elems(){
     const result = document.querySelector(".result");
     const restartBtn = document.getElementById("restartBtn");
     const undoBtn = document.getElementById("undoBtn");
+    const restartModalBtn = document.getElementById("restartModalBtn");
+    const endModal = document.getElementById("endModal");
     const gameSettingsModal = document.getElementById("gameSettingsModal");
     const playerSubmitModalBtn = document.getElementById("playerSubmitBtn");
     const computerSubmitModalBtn = document.getElementById("computerSubmitBtn");
@@ -11,26 +13,30 @@ const domElements = (function elems(){
     const computerTabBtn = document.getElementById("computerFormat");
     const playerTab = document.getElementById("player");
     const computerTab = document.getElementById("computer");
+    const gameForm = document.getElementById("gameForm");
     return {
         field,
         result,
         restartBtn,
         undoBtn,
+        restartModalBtn,
+        endModal,
         gameSettingsModal,
         playerSubmitModalBtn,
         computerSubmitModalBtn,
         playerTabBtn,
         computerTabBtn,
         playerTab,
-        computerTab
+        computerTab,
+        gameForm
     }
 })();
 
 // makes players
 const playerFactory = (name, sign, status) => ({name, sign, status,});
 
-const player1 = playerFactory("Sally", "x", 1);
-const player2 = playerFactory("Mater", "o", 0);
+const player1 = playerFactory("X", "x", 1);
+const player2 = playerFactory("O", "o", 0);
 
 // changes players' status
 function changePlayersStatus(){
@@ -80,12 +86,15 @@ const gameBoard = (() => {
     // prints ending message
     const printScore = () =>{
         const result = gameBoard.checkScore(board);
-        if(result === 1)
-            domElements.result.textContent = `${player1.name  } won! Congratulations!`;
-        else if(result === -1)
-            domElements.result.textContent = `${player2.name  } won! Congratulations!`;
-        else if(result === 0)
-            domElements.result.textContent = "Draw!";
+        if(result !== 2){
+            domElements.endModal.style.display = "block";
+            if(result === 1)
+                domElements.result.textContent = `${player1.name  } won! Congratulations!`;
+            else if(result === -1)
+                domElements.result.textContent = `${player2.name  } won! Congratulations!`;
+            else if(result === 0)
+                domElements.result.textContent = "Draw!";
+        }
     }
 
     // puts players' moves in the array
@@ -111,7 +120,7 @@ const gameBoard = (() => {
                     tmp+=1;
             if(tmp !== 9 && domElements.result.textContent === ""){
                 let computerMove = Math.floor(Math.random() * 8);       
-                while(board[computerMove] === "x" || board[computerMove] === "o")
+                while(board[computerMove] === player1.sign || board[computerMove] === player2.sign)
                     computerMove = Math.floor(Math.random() * 8);
 
                 board[computerMove] = player2.sign;
@@ -134,7 +143,7 @@ const gameBoard = (() => {
 
             for(let i = 0; i < 9; i+=1){
                 if(board[i] === 0){
-                    board[i] = "x";
+                    board[i] = player1.sign;
                     maxEval = Math.max(minimax(depth - 1, false), maxEval);
                     board[i] = 0;
                 }
@@ -145,7 +154,7 @@ const gameBoard = (() => {
         let minEval = Infinity;
         for(let i = 0; i < 9; i+=1){
             if(board[i] === 0){
-                board[i] = "o";
+                board[i] = player2.sign;
                 minEval = Math.min(minimax(depth - 1, true), minEval);
                 board[i] = 0;
             }
@@ -165,11 +174,10 @@ const gameBoard = (() => {
 
         for(let i = 0; i < 9; i+=1) {
             if(board[i] === 0){
-                board[i] = "o";
+                board[i] = player2.sign;
                 const moveEval = minimax(9 - turn, true);
                 board[i] = 0;
 
-                // console.log(`index: ${  i  } val: ${  moveEval}`);
                 if(moveEval < minEval){
                     index = i;
                     minEval = moveEval;
@@ -362,7 +370,6 @@ const displayController = (() => {
             domElements.field[computerFieldNumber].className = "notChosen";
         }
 
-        console.log(`pfn: ${  playerFieldNumber}`);
         domElements.field[playerFieldNumber].className = "notChosen";
         domElements.field[playerFieldNumber].setAttribute("listener", "true");
         domElements.field[playerFieldNumber].addEventListener("click", gameBoard.playerMove(playerFieldNumber), {once: true });
@@ -376,7 +383,8 @@ const displayController = (() => {
 
     // stops displaying modal
     const modalToNone = () => function funModalToNone() {
-    domElements.gameSettingsModal.style.display = "none";
+        domElements.gameSettingsModal.style.display = "none";
+        domElements.endModal.style.display = "none";
     };
 
     // changes tabs on the modal
@@ -416,11 +424,14 @@ const gameModes = (() => {
         domElements.undoBtn.addEventListener("click", gameBoard.undo());
         domElements.undoBtn.addEventListener("click", displayController.undoDisplay());
 
+        // restart button at the end of the game
+        domElements.restartModalBtn.addEventListener("click", gameBoard.clearBoard());
+        domElements.restartModalBtn.addEventListener("click", displayController.clearDisplay());
+        domElements.restartModalBtn.addEventListener("click", displayController.modalToNone());
     }
 
     // getting input from player vs random computer
-    const listenRandomComputer = () => function funListenRandomComputer(){
-        player2.name = "computer";
+    function listenRandomComputer(){
         for (let i = 0; i < domElements.field.length; i+=1) {
             domElements.field[i].setAttribute("listener", "true");
             domElements.field[i].addEventListener("click", gameBoard.playerMove(i), {once: true });
@@ -435,10 +446,15 @@ const gameModes = (() => {
             // undo button
             domElements.undoBtn.addEventListener("click", gameBoard.undoVsComputer());
             domElements.undoBtn.addEventListener("click", displayController.undoDisplayVsRandomComputer());
+
+            // restart button at the end of the game
+            domElements.restartModalBtn.addEventListener("click", gameBoard.clearBoard());
+            domElements.restartModalBtn.addEventListener("click", displayController.clearDisplayVsRandomComputer());
+            domElements.restartModalBtn.addEventListener("click", displayController.modalToNone());
     }
 
-    const listenMinimaxComputer = () => function funListenMinimaxComputer(){
-        player2.name = "computer";
+    // getting input from player vs minimax computer
+    function listenMinimaxComputer(){
         for (let i = 0; i < domElements.field.length; i+=1) {
             domElements.field[i].setAttribute("listener", "true");
             domElements.field[i].addEventListener("click", gameBoard.playerMove(i), {once: true });
@@ -453,6 +469,11 @@ const gameModes = (() => {
             // undo button
             domElements.undoBtn.addEventListener("click", gameBoard.undoVsComputer());
             domElements.undoBtn.addEventListener("click", displayController.undoDisplayVsMinimaxComputer());
+
+            // restart button at the end of the game
+            domElements.restartModalBtn.addEventListener("click", gameBoard.clearBoard());
+            domElements.restartModalBtn.addEventListener("click", displayController.clearDisplayVsMinimaxComputer());
+            domElements.restartModalBtn.addEventListener("click", displayController.modalToNone());
     }
 
     return{
@@ -466,9 +487,36 @@ const gameModes = (() => {
 domElements.playerSubmitModalBtn.addEventListener("click", displayController.modalToNone());
 domElements.computerSubmitModalBtn.addEventListener("click", displayController.modalToNone());
 domElements.playerSubmitModalBtn.addEventListener("click", gameModes.listenPlayer());
-// domElements.computerSubmitModalBtn.addEventListener("click", gameModes.listenRandomComputer());
-domElements.computerSubmitModalBtn.addEventListener("click", gameModes.listenMinimaxComputer());
+
 
 // changing tabs on modal
 domElements.playerTabBtn.addEventListener("click", displayController.changeModalTabs("player"));
 domElements.computerTabBtn.addEventListener("click", displayController.changeModalTabs("computer"));
+
+
+//  gets data from form regarding computer type
+domElements.gameForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  // eslint-disable-next-line no-new
+  new FormData(domElements.gameForm);
+  displayController.modalToNone();
+});
+
+domElements.gameForm.addEventListener("formdata", (e) => {
+    player1.name = "You";
+    player2.name = "Computer";
+    
+    let computerType = 0;
+    const data = e.formData;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const value of data.values()) {
+        if(value === "minimax")
+            computerType += 1;   
+    };
+    if(computerType === 1)
+        gameModes.listenMinimaxComputer();
+    else
+        gameModes.listenRandomComputer();
+
+    domElements.gameForm.reset(); 
+});
