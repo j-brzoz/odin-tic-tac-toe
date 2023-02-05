@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,10 +9,9 @@
     <title>Tic Tac Toe</title>
 </head>
 <body>
-    <div class="buttons">
-        <button id="restartBtn">RESTART</button>
-        <button id="undoBtn">UNDO</button>
-        <button id="themeChangeBtn">THEME CHANGE</button>
+    <div class="buttons">   
+        <button id="menuBtn">MENU</button>
+        <button id="themeChangeBtn">THEME</button>
     </div>
     <div class="board">
         <field class="notChosen" id="1"></field>
@@ -25,32 +24,41 @@
         <field class="notChosen" id="8"></field>
         <field class="notChosen" id="9"></field>
     </div>
+    <div class="buttons">
+        <button id="restartBtn">RESTART</button>
+        <button id="undoBtn">UNDO</button>
+    </div>
     <div class="modal" id="gameSettingsModal">
-        <div class="modalContent">
-            <p>Wanna play?</p>
+        <div class="settingsModal">
+            <div class="title">
+                <p>Wanna play tic tac toe?</p>
+                <button class="themeChangeModalBtn"></button>
+            </div>
             <div class="tabs">
                 <button type="button" id="playerFormat">vs another player</button>
                 <button type="button" id="computerFormat">vs computer</button>
             </div>
             <div class="gameFormat" id="player">
-                <p>vs another player</p><br>
-                <button id="playerSubmitBtn">submit</button>
+                <button id="playerSubmitBtn" class="submitBtn">LET'S GO!</button>
             </div>
             <div class="gameFormat" id="computer" style="display:none">
-                <p>vs computer</p><br>
                 <form action="" class="inputs" id="gameForm">
-                    <input type="radio" name="computerType" id="random" value="random" checked>
-                    <label for="random">Random computer</label>
-                    <input type="radio" name="computerType" id="minimax" value="minimax">
-                    <label for="minimax">Unbeatable computer</label>
-                    <button id="computerSubmitBtn">submit</button>
+                    <label for="random">Random computer
+                        <input type="radio" name="computerType" id="random" value="random" checked>
+                        <span></span>
+                    </label>
+                    <label for="minimax">Unbeatable computer
+                        <input type="radio" name="computerType" id="minimax" value="minimax">
+                        <span></span>
+                    </label>
+                    <button id="computerSubmitBtn" class="submitBtn">LET'S GO!</button>
                 </form>
             </div>
             </form>
         </div>
     </div>
     <div class="modal" id="endModal">
-        <div class="modalContent">
+        <div class="endingModal">
             <div class="result"></div>
             <p>Wanna play again?</p>
             <button id="restartModalBtn">RESTART</button>

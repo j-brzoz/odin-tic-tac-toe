@@ -1,10 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
 
 :root.dark {
-    --background-color: rgb(60, 60, 60);
+    --background-color: rgb(50, 50, 50);
+    --modal-background-color: rgb(10, 10, 10);
+    --button-hover-background-color: rgb(100, 100, 100);
+    --button-focus-background-color: rgb(70, 70, 70);
+    --submitBtn-background-color: rgb(18, 91, 7);
+    --submitBtn-hover-background-color: rgb(30, 123, 16);
+    --font-color: rgb(255, 255, 255);
+    --font: "Poppins", Arial, Helvetica, sans-serif;
+    --theme-svg-filter: invert(81%) sepia(100%) saturate(0%) hue-rotate(262deg) brightness(110%) contrast(102%);
+    --theme-svg-hover-filter: invert(82%) sepia(1%) saturate(0%) hue-rotate(168deg) brightness(88%) contrast(91%);
 }
 
 :root.light {
-    --background-color: rgb(200, 200, 200);
+    --background-color: rgb(220, 220, 220);
+    --modal-background-color: rgb(255, 255, 255);
+    --button-hover-background-color: rgb(180, 180, 180);
+    --button-focus-background-color: rgb(200, 200, 200);
+    --submitBtn-background-color: rgb(137, 245, 104);
+    --submitBtn-hover-background-color: rgb(86, 221, 46);
+    --font-color: rgb(0, 0, 0);
+    --font: "Poppins", Arial, Helvetica, sans-serif;
+    --theme-svg-filter: invert(0%) sepia(20%) saturate(4873%) hue-rotate(241deg) brightness(102%) contrast(106%);
+    --theme-svg-hover-filter: invert(42%) sepia(1%) saturate(0%) hue-rotate(160deg) brightness(92%) contrast(92%);
 }
 
 * { 
@@ -13,56 +32,292 @@
     box-sizing: border-box; 
 }
 
-body {
-    background-color: var(--background-color);
+@media screen and (min-width: 1201px){
+    html {
+        font-size: 18px;
+    }
 }
 
+@media screen and (min-width: 601px) and (max-width: 1200px){
+    html {
+        font-size: 14px;
+    }
+}
 
-.board{
+@media screen and (max-width: 600px){
+    html {
+        font-size: 10px;
+    }
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color);
+    font-family: var(--font);
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.buttons button {
+    height: 4rem;
+    width: 10rem;
+    background-color: var(--modal-background-color);
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.3rem;
+    color: var(--font-color);
+    font-family: var(--font);
+    margin: 2rem 0 1rem 0;
+}
+
+.buttons button:hover {
+    background-color: var(--button-hover-background-color);
+}
+
+.board {
     display: grid;
-    grid-template-columns: 150px 150px 150px;
-    grid-template-rows: 150px 150px 150px;
+    grid-template-columns: 12rem 12rem 12rem;
+    grid-template-rows: 12rem 12rem 12rem;
+}
+
+field:nth-child(-n+3) {
+    border-top: 6px var(--modal-background-color) solid;
+}
+
+field:nth-child(3n) {
+    border-right: 6px var(--modal-background-color) solid;
+}
+
+field:nth-child(n+7) {
+    border-bottom: 6px var(--modal-background-color) solid;
+}
+
+field:nth-child(3n+1) {
+    border-left: 6px var(--modal-background-color) solid;
+}
+
+field {
+    border: 3px var(--modal-background-color) solid;
 }
 
 .notChosen{
-    background-color: bisque;
-    border: 2px black solid;
+    background-color: var(--background-color);
+    
 }
 
 .firstSign{
-    background-color: orange;
-    border: 2px black solid;
+    background: url("./icons/cross.svg");
+    background-size: cover;
 }
 
 .secondSign{
-    background-color: red;
-    border: 2px black solid;
+    background: url("./icons/circle.svg");
+    background-size: cover;
 }
 
 .modal {
     display: block;
     position: fixed;
     z-index: 1;
-    background-color: rgb(60, 59, 59);
+    background-color: var(--background-color);
     width: 100%;
     height: 100%;
     left: 0;
     top: 0;
-    padding-top: 250px;
+    padding-top: 10rem;
 }
 
-.modalContent {
+.settingsModal {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    background-color: white;
+    gap: 0.6rem;
+    background-color: var(--modal-background-color);
     margin: auto;
-    padding: 20px 40px;
-    width: 20%;
-    border-radius: 12px;
+    padding: 1rem 2rem;
+    width: 32rem;
+    height: 21rem;
+    border-radius: 0.6rem;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+}
+
+.title p {
+    margin-left: 3.2rem;
+    font-size: 1.8rem;
+    color: var(--font-color);
+    font-weight: 700;
+}
+
+.themeChangeModalBtn {
+    margin-left: 1.6rem;
+    background: url("./icons/theme.svg");
+    background-size: cover;
+    height: 1.6rem;
+    width: 1.6rem;
+    border: none;
+    filter: var(--theme-svg-filter);
+}
+
+.themeChangeModalBtn:hover {
+    filter: var(--theme-svg-hover-filter);
+}
+
+.tabs {
+    display: flex;
+    gap: 0.8rem;
+    padding-top: 1rem;
+}
+
+.tabs button {
+    height: 4rem;
+    width: 10rem;
+    background-color: var(--background-color);
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.3rem;
+    color: var(--font-color);
+    font-family: var(--font);
+}
+
+.tabs button:hover {
+    background-color: var(--button-hover-background-color);
+}
+
+.tabs button:focus {
+    background-color: var(--button-focus-background-color);
+}
+
+.submitBtn {
+    height: 4rem;
+    width: 12rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 0.3rem;
+    font-family: var(--font);
+    background-color: var(--submitBtn-background-color);
+    color: var(--font-color);
+    font-weight: 700;
+}
+
+.submitBtn:hover {
+    background-color: var(--submitBtn-hover-background-color);
+}
+
+.inputs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* credit to https://www.w3schools.com/howto/howto_css_custom_checkbox.asp */
+/* Customize the label*/
+.inputs label {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 16rem;
+    height: 2rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: var(--font-color);
+}
+
+/* Hide the browser's default radio button */
+.inputs input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+/* Create a custom radio button */
+.inputs span {
+    position: absolute;
+    top: 0.3rem;
+    left: 0;
+    height: 1.2rem;
+    width: 1.2rem;
+    background-color: var(--background-color);
+    border-radius: 50%;
+}
+
+/* On mouse-over, add a grey background color */
+label:hover input ~ span {
+    background-color: var(--button-hover-background-color);
+}
+
+/* When the radio button is checked, add a background */
+label input:checked ~ span {
+    background-color: var(--font-color);
+}
+  
+/* Create the indicator (the dot/circle - hidden when not checked) */
+span:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+  
+/* Show the indicator (dot/circle) when checked */
+label input:checked ~ span:after {
+    display: block;
 }
 
 #endModal {
     display: none;
+}
+
+.endingModal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--modal-background-color);
+    margin: auto;
+    padding: 2rem 2rem;
+    width: 34rem;
+    height: 16rem;
+    border-radius: 0.6rem;   
+}
+
+.endingModal div{
+    font-size: 1.8rem;
+    color: var(--font-color);
+    font-weight: 700;
+}
+
+.endingModal p{
+    color: var(--font-color);
+}
+
+.endingModal button {
+    height: 4rem;
+    width: 10rem;
+    background-color: var(--background-color);
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.3rem;
+    color: var(--font-color);
+    font-family: var(--font);
+}
+
+.endingModal button:hover {
+    background-color: var(--button-hover-background-color);
 }
