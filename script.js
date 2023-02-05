@@ -527,3 +527,4 @@ function setTheme() {
     root.className = newTheme;
   }
 document.getElementById("themeChangeBtn").addEventListener("click", setTheme);
+document.querySelector(".themeChangeModalBtn").addEventListener("click", setTheme);
