@@ -14,6 +14,9 @@ const domElements = (function elems(){
     const playerTab = document.getElementById("player");
     const computerTab = document.getElementById("computer");
     const gameForm = document.getElementById("gameForm");
+    const themeChangeBtn = document.getElementById("themeChangeBtn");
+    const themeChangeModalBtn = document.querySelector(".themeChangeModalBtn");
+    const menuBtn = document.getElementById("menuBtn");
     return {
         field,
         result,
@@ -28,7 +31,10 @@ const domElements = (function elems(){
         computerTabBtn,
         playerTab,
         computerTab,
-        gameForm
+        gameForm,
+        themeChangeBtn,
+        themeChangeModalBtn,
+        menuBtn
     }
 })();
 
@@ -526,5 +532,12 @@ function setTheme() {
     const newTheme = root.className === "dark" ? "light" : "dark";
     root.className = newTheme;
   }
-document.getElementById("themeChangeBtn").addEventListener("click", setTheme);
-document.querySelector(".themeChangeModalBtn").addEventListener("click", setTheme);
+domElements.themeChangeBtn.addEventListener("click", setTheme);
+domElements.themeChangeModalBtn.addEventListener("click", setTheme);
+
+// menu button
+const refreshPage = () => {
+    window.location.reload();
+  }
+  
+domElements.menuBtn.addEventListener("click", refreshPage)
